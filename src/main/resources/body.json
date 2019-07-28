@@ -1,0 +1,14 @@
+{
+  "title": "메일 등록 안내",
+  "content": "사용자 등록 완료",
+  "mailType": "CTMS_USER_REGISTRATION",
+  "recipients": [
+    "taesu@crscube.co.kr"
+  ],
+  "model": {
+    "sponsorName": "CRSCUBE",
+    "userId": "taesu",
+    "username": "Lee Tae Su",
+    "systemURL": "www.cubectms.com"
+  }
+}

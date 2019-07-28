@@ -1,0 +1,45 @@
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.11.56:9092
+        bindings:
+          send-mail-in:
+            consumer:
+              autoCommitOffset: false   # 위치가 여기임을 주의..
+
+      bindings:
+        greeting-in:
+          destination: greetings
+          contentType: application/json
+        greeting-out:
+          destination: greetings
+          contentType: application/json
+
+        send-mail-in:
+          group-id: send-mail-group
+          destination: send-mail
+          contentType: application/json
+          consumer:
+            idleEventInterval: 30000
+            autoCommitOffset: false
+            ackEachRecord: true
+            startOffset: earliest
+            headerMode: raw
+        send-mail-out:
+          group-id: send-mail-group
+          destination: send-mail
+          contentType: application/json
+          producer:
+            configuration:
+              retries: 1
+
+
+  kafka:
+    consumer:
+      enable-auto-commit: false
+    listener:
+      ack-mode: manual
+
+
