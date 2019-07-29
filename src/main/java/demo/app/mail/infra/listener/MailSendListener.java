@@ -13,6 +13,7 @@ import org.springframework.messaging.Message;
 
 /**
  * Created by itaesu on 28/07/2019.
+ * @author Lee Tae Su
  */
 @Slf4j
 @EnableBinding(MailSendStream.class)
@@ -22,13 +23,23 @@ public class MailSendListener {
 
     @StreamListener(MailSendStream.INPUT)
     public void handleSendMail(Message<SendMailInputRequest> message) {
-        this.mailSendService.send(message.getPayload());
-
         final Acknowledgment acknowledgment
                 = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
 
-        if(acknowledgment != null){
-            acknowledgment.acknowledge();      //Auto commit을 하지 않ㅇ고 명시적으로 커밋 함
-        }
+        //max poll interval ms 설정에 의해 오래 걸리는 작업이 있는 경우
+        //다른 Consumer에 할당되어 중복 처리될 가능성이 있음
+        this.mailSendService.send(message.getPayload())
+                            .thenAccept(sendEmailResult -> {
+                                log.info("Send mail result message id [{}]", sendEmailResult.getMessageId());
+                                log.info("Send mail result response {}", sendEmailResult.getSdkResponseMetadata());
+                                if (acknowledgment != null) {
+                                    acknowledgment.acknowledge();      //Auto commit을 하지 않ㅇ고 명시적으로 커밋 함
+                                }
+                            })
+                            .exceptionally(throwable -> {
+                                log.error("The email was not sent. [{}]", throwable.getMessage());
+                                log.error("Exception is ", throwable);
+                                return null;
+                            });
     }
 }

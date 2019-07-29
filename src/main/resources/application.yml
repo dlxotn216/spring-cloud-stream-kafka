@@ -6,8 +6,14 @@ spring:
           brokers: 192.168.11.56:9092
         bindings:
           send-mail-in:
+            group-id: send-mail-group
             consumer:
+              requeue-rejected: true
               autoCommitOffset: false   # 위치가 여기임을 주의..
+              max:
+                poll:
+                  interval:
+                    ms: 60000
 
       bindings:
         greeting-in:
@@ -22,18 +28,11 @@ spring:
           destination: send-mail
           contentType: application/json
           consumer:
-            idleEventInterval: 30000
-            autoCommitOffset: false
-            ackEachRecord: true
-            startOffset: earliest
-            headerMode: raw
+            max-attempts: 1             #spring retry의 retry template 인자를 위한 count
         send-mail-out:
           group-id: send-mail-group
           destination: send-mail
           contentType: application/json
-          producer:
-            configuration:
-              retries: 1
 
 
   kafka:
